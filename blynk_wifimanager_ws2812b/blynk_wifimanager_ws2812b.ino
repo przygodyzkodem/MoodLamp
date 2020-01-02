@@ -20,6 +20,8 @@ char ssid[] = "wifi_name";
 char pass[] = "wifi_password";
 
 WS2812FX strip = WS2812FX(PIXEL_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800);
+WiFiManagerParameter blynkToken("Blynk", "blynk token", blynk_token, 33);
+
 
 int mode = 0;
 int red = 255;
@@ -27,7 +29,23 @@ int green = 255;
 int blue = 255;
 int brightness = 255;
 
+void initializeLedStrip() {
+  strip.init();
+  strip.setBrightness(255);
+  strip.setColor(255,200,170);
+  strip.setSpeed(200);
+  strip.setMode(0);
+  strip.start();
+  strip.service();
+}
 
+void connectWiFi() {
+  WiFiManager wifiManager;
+  //wifiManager.resetSettings(); //WiFiManager remembers previously connected APs
+  
+  wifiManager.addParameter(&blynkToken);
+  wifiManager.autoConnect("Lampka");
+}
 
 void setup()
 {
@@ -40,20 +58,10 @@ void setup()
   char blynkTokenEEPROM[34] = "";
   EEPROM.get(0, blynkTokenEEPROM);
   Serial.println(blynkTokenEEPROM);
-
-  strip.init();
-  strip.setBrightness(255);
-  strip.setColor(255,200,170);
-  strip.setSpeed(200);
-  strip.setMode(0);
-  strip.start();
   
-  WiFiManager wifiManager;
-  //wifiManager.resetSettings(); //WiFiManager remembers previously connected APs
+  initializeLedStrip();
+  connectWiFi();
   
-  WiFiManagerParameter blynkToken("Blynk", "blynk token", blynk_token, 33);
-  wifiManager.addParameter(&blynkToken);
-  wifiManager.autoConnect("Lampka");
   if (blynkTokenEEPROM != "") {
     Serial.println(blynkTokenEEPROM);
     Blynk.config(blynkTokenEEPROM);
@@ -65,9 +73,11 @@ void setup()
   if(!Blynk.connect()) {
    Serial.println("Blynk connection timed out.");
   }
+  
   for (int i = 0; i < 34 ; i++) { //TODO: Check if array size 33 works good
     blynkTokenEEPROM[i] = blynkToken.getValue()[i];
   }
+  
   Serial.println(blynkTokenEEPROM);
   //blynkToken.getValue());
   EEPROM.put(0, blynkTokenEEPROM);
@@ -103,11 +113,9 @@ BLYNK_WRITE(V3) {
  int pinValue = param.asInt(); // Assigning incoming value from pin V3 to a variable
  if (pinValue == 1) {
     strip.stop();
-    //digitalWrite(D4, HIGH); // Turn LED off.
   } else {
     strip.start();
-    //digitalWrite(D4, LOW); // Turn LED on.
- }
+  }
 }
 
 BLYNK_WRITE(V4) {
