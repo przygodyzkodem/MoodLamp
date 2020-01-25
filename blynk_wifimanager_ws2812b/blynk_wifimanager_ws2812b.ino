@@ -52,6 +52,7 @@ void setup()
   Serial.begin(9600);
   delay(100);
   pinMode(D4, OUTPUT);
+  digitalWrite(D4, HIGH);
 
   EEPROM.begin(512);
   char blynkTokenEEPROM[34] = "";
@@ -89,7 +90,6 @@ void setup()
     EEPROM.commit();
   }
   
-  digitalWrite(D4, LOW);
   Blynk.virtualWrite(V3, LOW);
 }
 
