@@ -2,6 +2,7 @@
 #define BLYNK_PRINT Serial
 #define LED_PIN D9
 #define PIXEL_COUNT 36
+#define BLYNK_TOKEN_LENGTH 33
 
 #include <ESP8266WiFi.h>
 #include <BlynkSimpleEsp8266.h>
@@ -21,21 +22,21 @@ char pass[] = "wifi_password";
 
 WS2812FX strip = WS2812FX(PIXEL_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800);
 WiFiManager wifiManager;
-WiFiManagerParameter blynkToken("Blynk", "blynk token", blynk_token, 33);
+WiFiManagerParameter blynkToken("Blynk", "blynk token", blynk_token, BLYNK_TOKEN_LENGTH);
 
 
 int mode = 0;
 int red = 255;
-int green = 255;
-int blue = 255;
+int green = 200;
+int blue = 170;
 int brightness = 255;
 
 void initializeLedStrip() {
   strip.init();
-  strip.setBrightness(255);
-  strip.setColor(255,200,170);
+  strip.setBrightness(brightness);
+  strip.setColor(red, green, blue);
   strip.setSpeed(200);
-  strip.setMode(0);
+  strip.setMode(mode);
   strip.start();
   strip.service();
 }
@@ -55,7 +56,7 @@ void setup()
   digitalWrite(D4, HIGH);
 
   EEPROM.begin(512);
-  char blynkTokenEEPROM[34] = "";
+  char blynkTokenEEPROM[BLYNK_TOKEN_LENGTH] = "";
   EEPROM.get(0, blynkTokenEEPROM);
   Serial.print("Blynk token read from EEPROM: ");
   Serial.println(blynkTokenEEPROM);
@@ -81,7 +82,7 @@ void setup()
   }
 
   if (blynkToken.getValue()[0] != blynk_token[0]) {
-    for (int i = 0; i < 34 ; i++) { //TODO: Check if array size 33 works good
+    for (int i = 0; i < BLYNK_TOKEN_LENGTH; i++) { //TODO: Check if array size 33 works good
       blynkTokenEEPROM[i] = blynkToken.getValue()[i];
     }
     Serial.print("Overwriting blynk token in EEPROM: ");
@@ -89,8 +90,12 @@ void setup()
     EEPROM.put(0, blynkTokenEEPROM);
     EEPROM.commit();
   }
-  
+
+  //Send to Blynk current lamp state so app reflects it correctly
+  Blynk.virtualWrite(V1, red, green, blue);
+  Blynk.virtualWrite(V2, brightness);
   Blynk.virtualWrite(V3, LOW);
+  Blynk.virtualWrite(V4, mode); 
 }
 
 void loop()
