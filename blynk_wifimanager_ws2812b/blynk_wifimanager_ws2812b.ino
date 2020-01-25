@@ -12,7 +12,7 @@
 
 // You should get Auth Token in the Blynk App.
 // Go to the Project Settings (nut icon).
-char blynk_token[] = "put_blynk_token_here";
+char blynk_token[] = "";
 
 // Your WiFi credentials.
 // Set password to "" for open networks.
@@ -20,6 +20,7 @@ char ssid[] = "wifi_name";
 char pass[] = "wifi_password";
 
 WS2812FX strip = WS2812FX(PIXEL_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800);
+WiFiManager wifiManager;
 WiFiManagerParameter blynkToken("Blynk", "blynk token", blynk_token, 33);
 
 
@@ -40,9 +41,7 @@ void initializeLedStrip() {
 }
 
 void connectWiFi() {
-  WiFiManager wifiManager;
   //wifiManager.resetSettings(); //WiFiManager remembers previously connected APs
-  
   wifiManager.addParameter(&blynkToken);
   wifiManager.autoConnect("Lampka");
 }
@@ -57,32 +56,39 @@ void setup()
   EEPROM.begin(512);
   char blynkTokenEEPROM[34] = "";
   EEPROM.get(0, blynkTokenEEPROM);
+  Serial.print("Blynk token read from EEPROM: ");
   Serial.println(blynkTokenEEPROM);
+  Serial.println("Blynk token from WebPanel: ");
+  Serial.print(blynkToken.getValue());
+  Serial.println();
   
   initializeLedStrip();
   connectWiFi();
   
-  if (blynkTokenEEPROM != "") {
-    Serial.println(blynkTokenEEPROM);
-    Blynk.config(blynkTokenEEPROM);
+  if (blynkToken.getValue()[0] != blynk_token[0]) {
+    Serial.println("Using Blynk token from WebPanel");
+    Blynk.config(blynkToken.getValue());  
   } else {
-    //Serial.println(blynkToken.getValue());
-    Blynk.config(blynkToken.getValue());
+    Serial.print("Using Blynk Token from EEPROM");
+    Blynk.config(blynkTokenEEPROM);
   }
   
   if(!Blynk.connect()) {
-   Serial.println("Blynk connection timed out.");
+    Serial.println("Blynk connection timed out.");
+    //wifiManager.resetSettings();
+    //ESP.restart();
   }
-  
-  for (int i = 0; i < 34 ; i++) { //TODO: Check if array size 33 works good
-    blynkTokenEEPROM[i] = blynkToken.getValue()[i];
-  }
-  
-  Serial.println(blynkTokenEEPROM);
-  //blynkToken.getValue());
-  EEPROM.put(0, blynkTokenEEPROM);
-  EEPROM.commit();
 
+  if (blynkToken.getValue()[0] != blynk_token[0]) {
+    for (int i = 0; i < 34 ; i++) { //TODO: Check if array size 33 works good
+      blynkTokenEEPROM[i] = blynkToken.getValue()[i];
+    }
+    Serial.print("Overwriting blynk token in EEPROM: ");
+    Serial.println(blynkTokenEEPROM);
+    EEPROM.put(0, blynkTokenEEPROM);
+    EEPROM.commit();
+  }
+  
   digitalWrite(D4, LOW);
   Blynk.virtualWrite(V3, LOW);
 }
