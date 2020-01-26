@@ -1,6 +1,9 @@
 /* Comment this out to disable prints and save space */
 #define BLYNK_PRINT Serial
+
 #define LED_PIN D9
+#define RESET_BUTTON_PIN D6
+
 #define PIXEL_COUNT 36
 #define BLYNK_TOKEN_LENGTH 33
 
@@ -55,6 +58,8 @@ void setup()
   pinMode(D4, OUTPUT);
   digitalWrite(D4, HIGH);
 
+  pinMode(RESET_BUTTON_PIN, INPUT_PULLUP);
+
   EEPROM.begin(512);
   char blynkTokenEEPROM[BLYNK_TOKEN_LENGTH] = "";
   EEPROM.get(0, blynkTokenEEPROM);
@@ -77,12 +82,10 @@ void setup()
   
   if(!Blynk.connect()) {
     Serial.println("Blynk connection timed out.");
-    //wifiManager.resetSettings();
-    //ESP.restart();
   }
 
   if (blynkToken.getValue()[0] != blynk_token[0]) {
-    for (int i = 0; i < BLYNK_TOKEN_LENGTH; i++) { //TODO: Check if array size 33 works good
+    for (int i = 0; i < BLYNK_TOKEN_LENGTH; i++) {
       blynkTokenEEPROM[i] = blynkToken.getValue()[i];
     }
     Serial.print("Overwriting blynk token in EEPROM: ");
@@ -102,8 +105,18 @@ void loop()
 {
   Blynk.run();
   strip.service();
+  handleResetButton();
 }
 
+void handleResetButton() {
+  int resetButtonState = digitalRead(RESET_BUTTON_PIN);
+  if (resetButtonState == LOW) {
+    Serial.println("RESET PRESSED");
+    wifiManager.resetSettings();
+    delay(1000);
+    ESP.restart();
+  }
+}
 
 BLYNK_WRITE(V1) {
   red = param[0].asInt();
