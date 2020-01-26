@@ -2,7 +2,7 @@
 #define BLYNK_PRINT Serial
 
 #define LED_PIN D9
-#define RESET_BUTTON_PIN D6
+#define RESET_BUTTON_PIN D3
 
 #define PIXEL_COUNT 36
 #define BLYNK_TOKEN_LENGTH 33
