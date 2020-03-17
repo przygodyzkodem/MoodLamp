@@ -2,8 +2,8 @@
 
 MoodLamp is an ESP8266 based WS2812B addressable LED controller. It's key features are:
 - 55 different togglable light effects
-- adjust light color
-- adjust brightness
+- adjustable light color
+- adjustable brightness
 - quick on/off toggle
 - easy configuration via captive portal
 - minimalistic hardware design - cheap and easy to assemble and to install in your home
@@ -21,13 +21,13 @@ Litophane lamp (gift for my lovely girlfriend):
 
 ## How to assemble your own Mood Lamp
 
-In this repository you can find several types of resources. I plan to create few form factors of hardware and several software versions. The common thing for all of them will be the usage of ESP8266 module and Arduino code to drive addressable LEDs (e.g. WS2812B). To create your own Mood Lamp, you need to follow steps listed below. Please note that each hyperlink will take you to another part of this repository which will contain another piece of documenation that will provide you with further details.
+In this repository you can find several types of resources. I plan to create few form factors of hardware and several software versions. The common thing for all of them will be the usage of ESP8266 module and Arduino code to drive addressable LEDs (e.g. WS2812B). To create your own Mood Lamp, please follow the steps listed below. Please note that each hyperlink will take you to another part of this repository which will contain another piece of documenation that will provide you with further details.
 
 1. Pick your hardware version:
 - you can build circuit out of Arduino modules based on Fritzing layout which you can find here
 - you can assemble a NodeMCU shield with resources in folder: 
 2. Select your software:
-- currently only implementation using Blynk platform: 
+- currently only implementation using Blynk platform available: [LINK](https://github.com/przygodyzkodem/MoodLamp/tree/master/Software/Blynk)
 3. Select proper power supply:
 - all of the hardware designs will require power supply with 5V DC voltage
 - to calculate the current required by your circuit, you can use the following equation: (60mA x N) + 120mA, where N is number of WS2812B diodes in your project
